@@ -30,8 +30,14 @@ var LowLatencyAudio = {
   
   setVolume: function(id, volume, success, fail) {
 		return exec(success, fail, "LowLatencyAudio", "setVolume", [id, volume]);    
+  },
+  
+  pause: function(id, success, fail) {
+		return exec(success, fail, "LowLatencyAudio", "pause", [id]);        
   }
   
 };
 
 module.exports = LowLatencyAudio;
+
+

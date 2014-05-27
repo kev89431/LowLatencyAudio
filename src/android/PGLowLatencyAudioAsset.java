@@ -81,5 +81,14 @@ public class PGLowLatencyAudioAsset {
 			voice.setVolume(volume);
 		}    
   }
+  
+  public void pause() throws IOException
+  {
+		for ( int x=0; x<voices.size(); x++) 
+		{
+			PGPolyphonicVoice voice = voices.get(x);
+			voice.pause();
+		}    
+  }
 	
 }

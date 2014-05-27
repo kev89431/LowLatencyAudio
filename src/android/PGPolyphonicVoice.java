@@ -96,6 +96,14 @@ public class PGPolyphonicVoice implements OnPreparedListener, OnCompletionListen
     mp.setVolume(volume, volume);
   }
 	
+	public void pause() throws IOException
+	{
+		if ( mp.isLooping() || mp.isPlaying() )
+		{
+			mp.pause();
+		}
+	}
+  
 	public void onPrepared(MediaPlayer mPlayer) 
 	{
 		if (state == PENDING_PLAY) 
