@@ -42,6 +42,7 @@ public class PGLowLatencyAudio extends CordovaPlugin {
 	public static final String STOP="stop";
 	public static final String LOOP="loop";
 	public static final String UNLOAD="unload";
+	public static final String SET_VOLUME = "setVolume";
 	
 	public static final int DEFAULT_POLYPHONY_VOICES = 15;
 	
@@ -50,6 +51,7 @@ public class PGLowLatencyAudio extends CordovaPlugin {
 	private static HashMap<String, PGLowLatencyAudioAsset> assetMap; 
 	private static HashMap<String, Integer> soundMap; 
 	private static HashMap<String, ArrayList<Integer>> streamMap; 
+	private static HashMap<String, Float> volumeMap;
 	
 	/* (non-Javadoc)
 	 * @see com.phonegap.api.Plugin#execute(java.lang.String, org.json.JSONArray, java.lang.String)
@@ -120,9 +122,11 @@ public class PGLowLatencyAudio extends CordovaPlugin {
 			}
 			else if ( PLAY.equals( action ) || LOOP.equals( action ) ) 
 			{
+				float volume = volumeMap.containsKey(audioID) ? volumeMap.get(audioID) : 1;
 				if ( assetMap.containsKey(audioID) )
 				{
 					PGLowLatencyAudioAsset asset = assetMap.get( audioID );
+					asset.setVolume(volume);
 					if ( LOOP.equals( action ) ) 
 						asset.loop();
 					else
@@ -141,9 +145,9 @@ public class PGLowLatencyAudio extends CordovaPlugin {
 					ArrayList<Integer> streams = streamMap.get( audioID );
 					if ( streams == null )
 						streams = new ArrayList<Integer>();
-					
+										
 					int assetIntID = soundMap.get( audioID );
-					int streamID = soundPool.play( assetIntID, 1, 1, 1, loops, 1);
+					int streamID = soundPool.play( assetIntID, volume, volume, 1, loops, 1);
 					streams.add( streamID );
 					streamMap.put( audioID , streams );
 					
@@ -212,6 +216,10 @@ public class PGLowLatencyAudio extends CordovaPlugin {
 					return false;
 				}
 			}
+      
+      if (SET_VOLUME.equals(action)) {
+        setVolume(audioID, (float)args.getDouble(1), callbackContext);
+      }
 			
 		} 
 		catch (Exception ex) 
@@ -221,6 +229,30 @@ public class PGLowLatencyAudio extends CordovaPlugin {
 		}
 		return true;
 	}
+  
+  private void setVolume(String id, float volume, CallbackContext callbackContext)
+  {
+	  volumeMap.put(id, volume);
+	  try {
+    if (assetMap.containsKey(id)) {
+			PGLowLatencyAudioAsset asset = assetMap.get(id);
+      asset.setVolume(volume);
+      callbackContext.success("OK");
+    }
+    else if (soundMap.containsKey(id)) {
+			ArrayList<Integer> streams = streamMap.get(id);
+			if (streams != null) {
+				for (int x=0; x< streams.size(); x++)
+				soundPool.setVolume(streams.get(x), volume, volume);
+			}
+      callbackContext.success("OK");      
+    }
+    callbackContext.error(ERROR_NO_AUDIOID);
+	  }
+	  catch (Exception ex) {
+			callbackContext.error(ex.toString());
+	  }
+  }
 
 	private void initSoundPool() 
 	{
@@ -242,6 +274,10 @@ public class PGLowLatencyAudio extends CordovaPlugin {
 		if ( assetMap ==null ) 
 		{
 			assetMap = new HashMap<String, PGLowLatencyAudioAsset>();
+		}
+		
+		if (volumeMap == null) {
+			volumeMap = new HashMap<String, Float>();
 		}
 	}
 }

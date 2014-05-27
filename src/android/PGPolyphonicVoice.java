@@ -90,6 +90,11 @@ public class PGPolyphonicVoice implements OnPreparedListener, OnCompletionListen
 		this.stop();
 		mp.release();
 	}
+  
+  public void setVolume(float volume) throws IOException
+  {
+    mp.setVolume(volume, volume);
+  }
 	
 	public void onPrepared(MediaPlayer mPlayer) 
 	{
